@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<!-- saved from url=(0106)https://teacher-assistant-megastudy.s3.ap-northeast-2.amazonaws.com/admin_multitenant_login_prototype.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAIS AI Hub — !!!!관리자 시스템 멀티테넌트 프로토타입</title>
+  <script src="./MAIS AI Hub — 관리자 시스템 멀티테넌트 프로토타입_files/saved_resource"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { pretendard: ['Pretendard', 'system-ui', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="./MAIS AI Hub — 관리자 시스템 멀티테넌트 프로토타입_files/pretendard.min.css">
+  <style>
+    * {
+      font-family: 'Pretendard', system-ui, sans-serif;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .slide-down {
+      animation: slideDown 0.15s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Toggle switch */
+    .toggle-track {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .toggle-track.on {
+      background-color: #4f46e5;
+    }
+
+    .toggle-track.off {
+      background-color: #cbd5e1;
+    }
+
+    .toggle-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 2px;
+      transition: left 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-track.on .toggle-thumb {
+      left: 22px;
+    }
+
+    .toggle-track.off .toggle-thumb {
+      left: 2px;
+    }
+
+    /* Matrix Toggle switch */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #4f46e5;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      background-color: #4f46e5;
+    }
+
+    .toggle-checkbox {
+      right: 4px;
+      transition: all 0.2s;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+
+    /* Custom Checkbox */
+    .custom-checkbox:checked {
+      background-color: #5C5CFF;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    }
+
+    /* Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 32px; height: 18px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .2s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+    input:checked + .slider { background-color: #5C5CFF; }
+    input:checked + .slider:before { transform: translateX(14px); }
+
+    /* Full-name Role Button (Pill Style) */
+    .role-btn {
+      padding: 5px 10px;
+      font-size: 9px;
+      font-weight: 800;
+      border-radius: 8px;
+      transition: all 0.2s;
+      border: 1px solid #f1f5f9;
+      color: #cbd5e1;
+      cursor: pointer;
+      background: white;
+      min-width: 54px;
+      text-align: center;
+    }
+    .role-btn:hover { border-color: #e2e8f0; color: #94a3b8; }
+    .role-btn.active.admin { background: #EEF2FF; color: #4F46E5; border-color: #C7D2FE; }
+    .role-btn.active.editor { background: #ECFDF5; color: #059669; border-color: #A7F3D0; }
+    .role-btn.active.viewer { background: #F8FAFC; color: #475569; border-color: #E2E8F0; }
+
+    /* Service Icon Group & Rich Tooltip */
+    .service-icon-group .rich-tooltip {
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateX(-50%) translateY(10px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+    .service-icon-group:hover .rich-tooltip {
+      opacity: 1; visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .role-badge-admin { background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; }
+    .role-badge-editor { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .role-badge-viewer { background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; }
+
+    .slide-down { animation: slideDown 0.3s ease-out; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.absolute{position:absolute}.relative{position:relative}.left-3{left:0.75rem}.top-1\/2{top:50%}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-4{margin-bottom:1rem}.mb-8{margin-bottom:2rem}.mt-2{margin-top:0.5rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.h-16{height:4rem}.min-h-screen{min-height:100vh}.w-16{width:4rem}.w-full{width:100%}.max-w-md{max-width:28rem}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-t{border-top-width:1px}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-4{padding:1rem}.p-8{padding:2rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.pl-10{padding-left:2.5rem}.pr-4{padding-right:1rem}.pt-6{padding-top:1.5rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.leading-relaxed{line-height:1.625}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-indigo-200\/50{--tw-shadow-color:rgb(199 210 254 / 0.5);--tw-shadow:var(--tw-shadow-colored)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:text-indigo-700:hover{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.focus\:border-transparent:focus{border-color:transparent}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-indigo-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(99 102 241 / var(--tw-ring-opacity, 1))}</style></head>
+
+<body class="bg-slate-50 text-slate-900">
+  <div id="app">
+        <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 fade-in">
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">M</div>
+              <h1 class="text-2xl font-bold text-slate-900">MAIS AI Hub</h1>
+              <p class="text-slate-500 mt-2">관리자 계정으로 로그인하세요</p>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">이메일</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></span>
+                  <input id="login-email" type="email" placeholder="example@megastudy.net" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">비밀번호</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                  <input type="password" placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all">
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button data-action="forgot-password" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">비밀번호를 잊으셨나요?</button>
+              </div>
+              <button data-action="login" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200/50">로그인</button>
+            </div>
+            <div class="mt-6 pt-6 border-t border-slate-100">
+              <p class="text-xs text-slate-400 text-center leading-relaxed">
+                계정이 없으신가요? MAIS 관리자에게 초대를 요청하세요.<br>
+                초대 링크를 통해서만 계정이 생성됩니다.
+              </p>
+            </div>
+          </div>
+        </div></div>
+
+  <script>
+    // ──────────────────────────────────────────
+    // State
+    // ──────────────────────────────────────────
+    const state = {
+      view: 'login', // login | forgot-password | select-workspace | admin-main | super-admin
+      currentWorkspace: null,
+      activeServiceMenu: null,
+      activeSubMenu: null,
+      activeSection: 'service',   // service | accounts
+      isInviteModalOpen: false,
+      isWorkspaceDropdownOpen: false,
+      isSuperAdmin: true,
+
+      // Super Admin 상태
+      superAdminTab: 'tenants',   // tenants | members | services
+      isCreateTenantModalOpen: false,
+      isEditTenantModalOpen: false,
+      selectedTenantId: null,
+      isServiceManageModalOpen: false,
+      selectedTenantForService: null,
+      isAddMemberToTenantModalOpen: false,
+      selectedTenantForMember: null,
+      isCreateServiceModalOpen: false, // 서비스 추가 모달
+      isEditServiceModalOpen: false,   // 서비스 수정 모달
+      selectedServiceId: null,        // 수정/삭제 대상 서비스 ID
+      superAdminMemberFilter: 'all', // all | high_elearning | kimyoung | elementary_middle
+
+      // New Filter States
+      memberFilterRole: 'all',
+      memberFilterWorkspace: 'all',
+      memberSearchQuery: '',
+
+      // Account/Permission states
+      isDeleteModalOpen: false,
+      isEditModalOpen: false,
+      selectedMemberId: null,
+      activeActionMenuId: null,
+      expandedServices: new Set(),
+
+      // Data pointers for state (to be populated)
+      allMembers: [],
+      workspaces: [],
+      allServices: [],
+      permissionPolicies: {},
+    };
+
+    // ──────────────────────────────────────────
+    // Mock Data — 회의 결정사항 반영
+    // ──────────────────────────────────────────
+
+    // 전체 서비스 카탈로그 (super_admin이 on/off 관리)
+    const allServices = [
+      { 
+        id: 'ai_search', name: 'AI 검색 서비스', icon: '🔍', desc: 'AI 기반 문서 검색 및 참조데이터 관리',
+        features: [
+          { id: 'f_search_data', name: '참조데이터 관리' },
+          { id: 'f_search_guard', name: '가드레일 설정' },
+          { id: 'f_search_log', name: '검색 로그' }
+        ]
+      },
+      { 
+        id: 'teacher_qa', name: '선생님 QnA', icon: '💬', desc: '선생님 질의응답 서비스 관리',
+        features: [
+          { id: 'f_qa_manage', name: 'QnA 관리' },
+          { id: 'f_qa_quality', name: '답변 품질 모니터링' }
+        ]
+      },
+      { 
+        id: 'ai_encoding', name: 'AI 인코딩', icon: '🎬', desc: 'AI 기반 영상 인코딩 작업 관리',
+        features: [
+          { id: 'f_enc_job', name: '인코딩 작업관리' },
+          { id: 'f_enc_status', name: '상태 모니터링' }
+        ]
+      },
+      { 
+        id: 'essay_eval', name: '자소서 평가 서비스', icon: '📝', desc: 'AI 자기소개서 평가 시스템',
+        features: [
+          { id: 'f_ess_eval', name: '평가 데이터 관리' },
+          { id: 'f_ess_result', name: '평가 결과 확인' }
+        ]
+      },
+      {
+        id: 'student_record', name: '학생부 관리', icon: '🎓', desc: '학생부 기록 및 종합 분석',
+        features: [
+          { id: 'f_record_manage', name: '기록 관리' },
+          { id: 'f_record_report', name: '분석 리포트' }
+        ]
+      },
+    ];
+    state.allServices = allServices;
+
+    const permissionPolicies = {
+      'ai_search': {
+        'f_search_data': { admin: true, editor: true, viewer: true },
+        'f_search_guard': { admin: true, editor: false, viewer: false },
+        'f_search_log': { admin: true, editor: true, viewer: false }
+      },
+      'teacher_qa': {
+        'f_qa_manage': { admin: true, editor: true, viewer: true },
+        'f_qa_quality': { admin: true, editor: true, viewer: false }
+      },
+      'ai_encoding': {
+        'f_enc_job': { admin: true, editor: true, viewer: true },
+        'f_enc_status': { admin: true, editor: false, viewer: false }
+      },
+      'essay_eval': {
+        'f_ess_eval': { admin: true, editor: false, viewer: false },
+        'f_ess_result': { admin: true, editor: true, viewer: true }
+      },
+      'student_record': {
+        'f_record_manage': { admin: true, editor: true, viewer: true },
+        'f_record_report': { admin: true, editor: true, viewer: false }
+      }
+    };
+    state.permissionPolicies = permissionPolicies;
+
+    // 워크스페이스(테넌트) = 사업본부
+    const workspaces = [
+      {
+        id: 'high_elearning',
+        name: '고등이러닝',
+        logo: '고',
+        color: 'bg-blue-600',
+        colorHex: '#2563eb',
+        allowedDomains: ['megastudy.net', 'megastudy.co.kr'],
+        enabledServiceIds: ['ai_search', 'teacher_qa', 'ai_encoding'],
+        createdAt: '2026-01-10',
+      },
+      {
+        id: 'kimyoung',
+        name: '김영편입',
+        logo: '김',
+        color: 'bg-emerald-600',
+        colorHex: '#059669',
+        allowedDomains: ['kimyoung.co.kr'],
+        enabledServiceIds: ['ai_search', 'essay_eval'],
+        createdAt: '2026-02-05',
+      },
+      {
+        id: 'elementary_middle',
+        name: '유초중등',
+        logo: '유',
+        color: 'bg-amber-600',
+        colorHex: '#d97706',
+        allowedDomains: ['megastudy.net', 'megastudy.co.kr'],
+        enabledServiceIds: ['ai_search', 'teacher_qa', 'ai_encoding'],
+        createdAt: '2026-02-15',
+      },
+    ];
+    state.workspaces = workspaces;
+
+    // 워크스페이스의 활성 서비스 객체 가져오기
+    function getWorkspaceServices(ws) {
+      return allServices.filter(s => ws.enabledServiceIds.includes(s.id));
+    }
+
+    // RBAC 역할 정의
+    const roles = [
+      { id: 'super_admin', label: 'Super Admin', desc: '전체 테넌트 접근, 시스템 설정 관리', badge: 'bg-purple-50 text-purple-700 border-purple-200' },
+      { id: 'admin', label: 'Admin', desc: '소속 테넌트 내 전체 관리 권한', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+      { id: 'editor', label: 'Editor', desc: '소속 테넌트 내 데이터 수정 권한', badge: 'bg-sky-50 text-sky-700 border-sky-200' },
+      { id: 'viewer', label: 'Viewer', desc: '소속 테넌트 내 조회만 가능', badge: 'bg-slate-50 text-slate-600 border-slate-200' },
+    ];
+
+    // 전체 멤버 (super_admin 통합 뷰용)
+    const allMembers = [
+      {
+        id: 1, email: 'admin@megastudy.net', name: '이민수', role: 'admin', status: 'active', joined: '2026-02-01', tenants: ['high_elearning'],
+        services: [
+          { id: 'ai_search', role: 'admin', features: [{id:'f_search_data', role:'admin'}, {id:'f_search_guard', role:'admin'}, {id:'f_search_log', role:'admin'}] },
+          { id: 'teacher_qa', role: 'admin', features: [{id:'f_qa_manage', role:'admin'}, {id:'f_qa_quality', role:'admin'}] },
+          { id: 'ai_encoding', role: 'admin', features: [{id:'f_enc_job', role:'admin'}, {id:'f_enc_status', role:'admin'}] }
+        ]
+      },
+      {
+        id: 2, email: 'sypark@megastudy.net', name: '박서연', role: 'editor', status: 'active', joined: '2026-02-05', tenants: ['high_elearning'],
+        services: [
+          { id: 'ai_search', role: 'editor', features: [{id:'f_search_data', role:'editor'}, {id:'f_search_guard', role:'editor'}, {id:'f_search_log', role:'editor'}] },
+          { id: 'teacher_qa', role: 'editor', features: [{id:'f_qa_manage', role:'editor'}, {id:'f_qa_quality', role:'editor'}] }
+        ]
+      },
+      {
+        id: 3, email: 'kim@kimyoung.co.kr', name: '김철수', role: 'admin', status: 'active', joined: '2026-02-10', tenants: ['kimyoung'],
+        services: [{ id: 'ai_search', role: 'admin', features: [{id:'f_search_data', role:'admin'}] }]
+      },
+      { id: 4, email: 'lee@megastudy.net', name: '이지원', role: 'viewer', status: 'pending', joined: '2026-02-20', tenants: ['high_elearning'],
+        services: [
+          { id: 'ai_search', role: 'viewer', features: [{id:'f_search_data', role:'viewer'}] },
+          { id: 'ai_encoding', role: 'viewer', features: [{id:'f_enc_job', role:'viewer'}] }
+        ]
+      },
+      { id: 5, email: 'editor@kimyoung.co.kr', name: '최은서', role: 'editor', status: 'active', joined: '2026-02-15', tenants: ['kimyoung'],
+        services: [{ id: 'ai_search', role: 'editor', features: [{id:'f_search_data', role:'editor'}] }]
+      },
+      { id: 6, email: 'admin_em@megastudy.net', name: '강지호', role: 'admin', status: 'active', joined: '2026-02-12', tenants: ['elementary_middle', 'high_elearning'],
+        services: [
+          { id: 'ai_search', role: 'admin', features: [{id:'f_search_data', role:'admin'}] },
+          { id: 'student_record', role: 'admin', features: [{id:'f_record_manage', role:'admin'}] }
+        ]
+      },
+      { id: 7, email: 'choi@megastudy.net', name: '최의진', role: 'super_admin', status: 'active', joined: '2026-01-01', tenants: ['high_elearning', 'kimyoung', 'elementary_middle'] },
+      { id: 8, email: 'park@megastudy.net', name: '박진희', role: 'super_admin', status: 'active', joined: '2026-01-01', tenants: ['high_elearning', 'kimyoung', 'elementary_middle'] },
+    ];
+    state.allMembers = allMembers;
+
+    function getMembersForWorkspace(wsId) {
+      return allMembers.filter(m => m.tenants.includes(wsId));
+    }
+
+    // ──────────────────────────────────────────
+    // Render Engine
+    // ──────────────────────────────────────────
+
+    function render() {
+      const scrollArea = document.getElementById('modal-scroll-area');
+      const scrollTop = scrollArea ? scrollArea.scrollTop : 0;
+
+      const app = document.getElementById('app');
+      switch (state.view) {
+        case 'login': app.innerHTML = renderLogin(); break;
+        case 'forgot-password': app.innerHTML = renderForgotPassword(); break;
+        case 'select-workspace': app.innerHTML = renderWorkspaceSelection(); break;
+        case 'admin-main': app.innerHTML = renderAdminMain(); break;
+        case 'super-admin': app.innerHTML = renderSuperAdmin(); break;
+      }
+      
+      const newScrollArea = document.getElementById('modal-scroll-area');
+      if (newScrollArea) newScrollArea.scrollTop = scrollTop;
+
+      bindEvents();
+    }
+
+    function navigate(view, opts = {}) {
+      state.view = view;
+      if (opts.workspace) state.currentWorkspace = opts.workspace;
+      if (opts.section) state.activeSection = opts.section;
+
+      // Reset all interactive states
+      state.isWorkspaceDropdownOpen = false;
+      state.isInviteModalOpen = false;
+      state.isCreateTenantModalOpen = false;
+      state.isEditTenantModalOpen = false;
+      state.isCreateServiceModalOpen = false;
+      state.isEditServiceModalOpen = false;
+      state.isServiceManageModalOpen = false;
+      state.isAddMemberToTenantModalOpen = false;
+      state.isEditModalOpen = false;
+      state.isDeleteModalOpen = false;
+      state.activeActionMenuId = null;
+      state.selectedServiceId = null;
+
+      render();
+    }
+
+    // ──────────────────────────────────────────
+    // SVG Icons
+    // ──────────────────────────────────────────
+    const icons = {
+      mail: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+      lock: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+      arrowLeft: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>`,
+      chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
+      chevronDown: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+      users: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      userPlus: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>`,
+      logOut: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>`,
+      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+      x: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+      moreVertical: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`,
+      globe: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`,
+      search: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+      building: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>`,
+      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>`,
+      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+      check: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+      edit: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>`,
+      trash: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+      externalLink: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+      layers: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>`,
+      tenant: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>`,
+      info: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+      alert: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      refresh: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`
+    };
+
+    // ──────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────
+    function getRoleBadge(roleId) {
+      const role = roles.find(r => r.id === roleId);
+      if (!role) return '';
+      return `<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ${role.badge}">${role.label}</span>`;
+    }
+
+    function getStatusStyle(status) {
+      if (status === 'active') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      if (status === 'pending') return 'bg-indigo-50 text-indigo-600 border-indigo-100';
+      return 'bg-slate-50 text-slate-400 border-slate-100';
+    }
+
+    function getStatusDot(status) {
+      const color = status === 'active' ? 'bg-emerald-500' : 'bg-amber-400';
+      const label = status === 'active' ? 'Active' : 'Pending';
+      return `<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full ${color}"></div><span class="text-sm text-slate-600">${label}</span></div>`;
+    }
+
+    function getTenantBadges(tenantIds) {
+      return tenantIds.map(tid => {
+        const ws = workspaces.find(w => w.id === tid);
+        if (!ws) return '';
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${ws.color.replace('bg-', 'bg-').replace('-600', '-50')} ${ws.color.replace('bg-', 'text-').replace('-600', '-700')} border-current/20">${ws.logo} ${ws.name}</span>`;
+      }).join(' ');
+    }
+
+    function getWsBadge(ws) {
+      return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-white ${ws.color}">${ws.logo} ${ws.name}</span>`;
+    }
+
+    // ──────────────────────────────────────────
+    // Views — Login / Password Reset
+    // ──────────────────────────────────────────
+
+    function renderLogin() {
+      return `
+        <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 fade-in">
+            <div class="text-center mb-8">
+              <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">M</div>
+              <h1 class="text-2xl font-bold text-slate-900">MAIS AI Hub</h1>
+              <p class="text-slate-500 mt-2">관리자 계정으로 로그인하세요</p>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">이메일</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${icons.mail}</span>
+                  <input id="login-email" type="email" placeholder="example@megastudy.net" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">비밀번호</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${icons.lock}</span>
+                  <input type="password" placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all" />
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button data-action="forgot-password" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">비밀번호를 잊으셨나요?</button>
+              </div>
+              <button data-action="login" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200/50">로그인</button>
+            </div>
+            <div class="mt-6 pt-6 border-t border-slate-100">
+              <p class="text-xs text-slate-400 text-center leading-relaxed">
+                계정이 없으신가요? MAIS 관리자에게 초대를 요청하세요.<br/>
+                초대 링크를 통해서만 계정이 생성됩니다.
+              </p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderForgotPassword() {
+      return `
+        <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 fade-in">
+            <button data-action="back-to-login" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+              ${icons.arrowLeft}
+              <span class="text-sm font-medium">로그인으로 돌아가기</span>
+            </button>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">비밀번호 재설정</h1>
+            <p class="text-slate-500 mb-8 text-sm leading-relaxed">계정의 이메일 주소를 입력하시면 비밀번호를 재설정할 수 있는 링크를 보내드립니다.</p>
+            <div class="space-y-4">
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${icons.mail}</span>
+                <input type="email" placeholder="example@megastudy.net" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+              </div>
+              <button data-action="send-reset" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200/50">재설정 링크 발송</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ──────────────────────────────────────────
+    // Views — Workspace Selection
+    // ──────────────────────────────────────────
+
+    function renderWorkspaceSelection() {
+      return `
+        <div class="min-h-screen bg-slate-50 p-8 flex flex-col items-center fade-in">
+          <div class="max-w-4xl w-full">
+            <div class="flex justify-between items-center mb-12">
+              <div>
+                <h1 class="text-3xl font-bold text-slate-900">워크스페이스 선택</h1>
+                <p class="text-slate-500 mt-2 font-medium">관리하실 워크스페이스를 선택하여 접속해 주세요.</p>
+              </div>
+              <button data-action="logout" class="flex items-center gap-2 text-slate-400 hover:text-red-500 font-medium transition-colors">
+                ${icons.logOut}
+                <span>로그아웃</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              ${workspaces.map(ws => `
+                <div data-action="select-workspace" data-workspace-id="${ws.id}"
+                     class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer group relative overflow-hidden">
+                  <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-600">
+                    ${icons.chevronRight}
+                  </div>
+                  <div class="w-14 h-14 ${ws.color} rounded-xl flex items-center justify-center text-xl font-bold text-white mb-6">
+                    ${ws.logo}
+                  </div>
+                  <h3 class="text-xl font-bold text-slate-900 mb-1">${ws.name}</h3>
+                  <p class="text-xs text-slate-400 mb-4">${ws.allowedDomains.join(', ')}</p>
+                  <div class="flex flex-wrap gap-2">
+                    ${getWorkspaceServices(ws).map(s => `<span class="px-2 py-1 bg-slate-50 text-slate-500 rounded text-[11px] font-bold border border-slate-100">${s.icon} ${s.name}</span>`).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            ${state.isSuperAdmin ? `
+            <div class="mt-8 pt-8 border-t border-slate-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-indigo-600">${icons.shield}</span>
+                  <span class="text-sm font-bold text-slate-500 uppercase tracking-wider">Super Admin</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button data-action="goto-super-admin" data-tab="tenants" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all text-sm font-medium text-slate-700">
+                    ${icons.building}
+                    <span>테넌트 관리</span>
+                  </button>
+                  <button data-action="goto-super-admin" data-tab="members" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all text-sm font-medium text-slate-700">
+                    ${icons.users}
+                    <span>멤버 관리</span>
+                  </button>
+                  <button data-action="goto-super-admin" data-tab="services" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all text-sm font-medium text-slate-700">
+                    ${icons.layers}
+                    <span>서비스 카탈로그</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+          </div>
+        </div>`;
+    }
+
+    // ──────────────────────────────────────────
+    // Views — Admin Main (워크스페이스 진입 후)
+    // ──────────────────────────────────────────
+
+    function renderAdminMain() {
+      const ws = state.currentWorkspace;
+      if (!ws) return '';
+      const members = getMembersForWorkspace(ws.id);
+      const services = getWorkspaceServices(ws);
+
+      return `
+        <div class="flex h-screen bg-slate-50">
+          <!-- Sidebar -->
+          <div class="w-72 bg-slate-900 text-white flex flex-col shadow-2xl relative">
+            <div class="relative">
+              <button data-action="toggle-workspace-dropdown" class="w-full p-5 border-b border-slate-800 flex items-center gap-3 hover:bg-slate-800 transition-colors text-left">
+                <div class="w-9 h-9 ${ws.color} rounded-lg flex items-center justify-center font-bold text-sm text-white flex-shrink-0">${ws.logo}</div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold text-sm truncate">${ws.name}</div>
+                  <div class="text-[11px] text-slate-400">MAIS AI Hub</div>
+                </div>
+                <span class="text-slate-400">${icons.chevronDown}</span>
+              </button>
+              ${state.isWorkspaceDropdownOpen ? `
+              <div class="absolute top-full left-0 w-full bg-slate-800 border-b border-slate-700 z-50 slide-down">
+                ${workspaces.map(w => `
+                  <button data-action="switch-workspace" data-workspace-id="${w.id}"
+                          class="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-700 transition-colors text-left ${w.id === ws.id ? 'bg-slate-700' : ''}">
+                    <div class="w-7 h-7 ${w.color} rounded-md flex items-center justify-center font-bold text-xs text-white flex-shrink-0">${w.logo}</div>
+                    <span class="text-sm font-medium ${w.id === ws.id ? 'text-white' : 'text-slate-300'}">${w.name}</span>
+                    ${w.id === ws.id ? `<span class="ml-auto text-indigo-400">${icons.check}</span>` : ''}
+                  </button>
+                `).join('')}
+                <div class="border-t border-slate-700">
+                  <button data-action="goto-workspace-selection" class="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-700 transition-colors text-left text-slate-400 text-sm">
+                    ${icons.globe} <span>전체 워크스페이스 보기</span>
+                  </button>
+                </div>
+              </div>
+              ` : ''}
+            </div>
+
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
+              <div class="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">서비스</div>
+              ${services.map(svc => `
+                <div>
+                  <button data-action="toggle-service" data-service-id="${svc.id}"
+                          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${state.activeServiceMenu === svc.id ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}">
+                    <span class="text-base">${svc.icon}</span>
+                    <span class="font-semibold text-sm flex-1">${svc.name}</span>
+                    <span class="transition-transform ${state.activeServiceMenu === svc.id ? 'rotate-180' : ''} text-slate-500">${icons.chevronDown}</span>
+                  </button>
+                  ${state.activeServiceMenu === svc.id ? `
+                  <div class="ml-8 mt-1 space-y-0.5 mb-2 slide-down">
+                    ${svc.features.map(f => `
+                      <button data-action="select-submenu" data-submenu="${f.name}" data-feature-id="${f.id}" data-service-id="${svc.id}"
+                              class="w-full text-left px-3 py-2 rounded-md text-sm transition-all ${state.activeSubMenu === f.name ? 'text-indigo-400 bg-indigo-500/10 font-semibold' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'}">
+                        ${f.name}
+                      </button>
+                    `).join('')}
+                  </div>` : ''}
+                </div>
+              `).join('')}
+
+              <div class="px-3 py-2 mt-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">관리</div>
+              <button data-action="goto-accounts"
+                      class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${state.activeSection === 'accounts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50' : 'text-slate-400 hover:bg-slate-800'}">
+                ${icons.users}
+                <span class="font-semibold text-sm">계정 관리</span>
+              </button>
+              ${state.isSuperAdmin ? `
+              <button data-action="goto-super-admin" data-tab="tenants"
+                      class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:bg-slate-800">
+                ${icons.layers}
+                <span class="font-semibold text-sm">Super Admin</span>
+                <span class="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full font-bold">SA</span>
+              </button>
+              ` : ''}
+            </nav>
+
+            <div class="p-3 border-t border-slate-800">
+              <button data-action="logout" class="w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-all">
+                ${icons.logOut}
+                <span class="font-medium text-sm">로그아웃</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
+              <div class="flex items-center gap-3 text-sm">
+                <span class="text-slate-400">${icons.globe}</span>
+                <span class="font-bold text-slate-900">${ws.name}</span>
+                ${state.activeSection === 'accounts' ? `<span class="text-slate-300">/</span><span class="font-medium text-slate-500">계정 관리</span>` : ''}
+                ${state.activeServiceMenu ? `
+                  <span class="text-slate-300">/</span>
+                  <span class="font-medium text-slate-500">${allServices.find(s => s.id === state.activeServiceMenu)?.name || ''}</span>
+                ` : ''}
+                ${state.activeSubMenu ? `<span class="text-slate-300">/</span><span class="font-medium text-slate-500">${state.activeSubMenu}</span>` : ''}
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${icons.search}</span>
+                  <input type="text" placeholder="통합 검색..." class="bg-slate-100 pl-10 pr-4 py-2 rounded-full text-sm w-64 outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm border border-indigo-200">박</div>
+              </div>
+            </header>
+
+            <main class="flex-1 overflow-auto p-8">
+              ${renderMainSection(ws, members)}
+            </main>
+          </div>
+
+          ${state.isInviteModalOpen ? renderInviteModal(ws) : ''}
+          ${state.isEditModalOpen ? renderEditModal() : ''}
+          ${state.isDeleteModalOpen ? renderDeleteModal() : ''}
+        </div>`;
+    }
+
+    function renderServiceContent() {
+      if (!state.activeSubMenu) {
+        return `
+          <div class="flex items-center justify-center h-full text-slate-400 flex-col gap-4">
+            <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+            </div>
+            <p class="font-medium text-lg">좌측 서비스 메뉴를 선택해 주세요</p>
+            <p class="text-sm text-slate-400">워크스페이스의 활성화된 서비스와 하위 관리 기능을 이용할 수 있습니다.</p>
+          </div>`;
+      }
+
+      // Feature-specific logic
+      const svc = allServices.find(s => s.id === state.activeServiceMenu);
+      const featureName = state.activeSubMenu;
+
+      return `
+        <div class="max-w-5xl mx-auto fade-in">
+          <div class="flex items-center gap-2 text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">
+            <span>${svc?.icon} ${svc?.name}</span>
+            <span class="text-slate-300">/</span>
+            <span>${featureName}</span>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">${featureName}</h2>
+          <p class="text-slate-500 mb-8">${svc?.name}의 ${featureName} 세부 관리 화면입니다.</p>
+          
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col items-center justify-center p-12 text-center group">
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-indigo-50 transition-colors">
+              <span class="text-4xl opacity-50 group-hover:scale-125 transition-transform group-hover:opacity-100">${svc?.icon}</span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">${featureName} — 기능 구현 중</h3>
+            <p class="text-slate-500 max-w-md leading-relaxed">
+              본 모듈은 개발 및 디자인 가이드에 따라 구성될 예정입니다.<br/>
+              현재 인터페이스 프로토타입 단계입니다.
+            </p>
+            <div class="mt-8 flex gap-3">
+              <button class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">${featureName} 시작하기</button>
+              <button class="px-6 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">가이드 보기</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderMainSection(ws, members) {
+      if (state.activeSection === 'accounts') return renderAccountsContent(ws, members);
+      return renderServiceContent();
+    }
+
+    function isCustomized(member) {
+      if (!member.services) return false;
+      const baseRole = (member.role || 'viewer').toLowerCase();
+      return member.services.some(srv => {
+        if (srv.role.toLowerCase() !== baseRole) return true;
+        if (srv.features && srv.features.some(f => f.role.toLowerCase() !== baseRole)) return true;
+        return false;
+      });
+    }
+
+    function renderServiceCleanIcons(member) {
+      let displayServices = member.services || [];
+      
+      // Fallback: If no services defined, show all workspace enabled services with the base role
+      if (displayServices.length === 0 && state.currentWorkspace) {
+        const workspaceServices = getWorkspaceServices(state.currentWorkspace);
+        const baseRole = (member.role || 'viewer').toLowerCase();
+        displayServices = workspaceServices.map(srv => ({
+          id: srv.id,
+          role: baseRole,
+          features: srv.features ? srv.features.map(f => ({ id: f.id, role: baseRole })) : []
+        }));
+      }
+
+      if (displayServices.length === 0) return '<span class="text-slate-300 text-xs italic">No access</span>';
+      
+      return displayServices.map(ms => {
+        const srv = state.allServices.find(s => s.id === ms.id);
+        if (!srv) return '';
+
+        return `
+          <div class="service-icon-group relative cursor-default">
+            <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-sm shadow-sm hover:bg-white hover:border-slate-200 transition-all">
+              ${srv.icon}
+            </div>
+
+            <div class="rich-tooltip absolute bottom-full left-1/2 mb-3 w-52 bg-white border border-slate-200 shadow-2xl rounded-2xl p-4 pointer-events-none">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-2">${srv.name}</p>
+                <div class="space-y-2">
+                    ${ms.features ? ms.features.map(f => {
+                      const featInfo = srv.features.find(sf => sf.id === f.id);
+                      const role = (f.role || 'viewer').toUpperCase();
+                      return `
+                        <div class="flex justify-between items-center gap-3">
+                            <span class="text-[11px] font-bold text-slate-600 truncate">${featInfo?.name || f.id}</span>
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 role-badge-${role.toLowerCase()}">${role}</span>
+                        </div>
+                      `;
+                    }).join('') : ''}
+                </div>
+                <div class="absolute top-full left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-slate-200 rotate-45 -mt-1.5"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAccountsContent(ws, members) {
+      const filtered = members.filter(m => {
+        const roleMatch = state.memberFilterRole === 'all' || m.role === state.memberFilterRole;
+        const searchMatch = m.name.toLowerCase().includes(state.memberSearchQuery.toLowerCase()) ||
+          m.email.toLowerCase().includes(state.memberSearchQuery.toLowerCase());
+        return roleMatch && searchMatch;
+      });
+      return `
+        <div class="max-w-6xl mx-auto space-y-6 text-sm">
+          <div class="flex justify-between items-end">
+            <div>
+              <p class="text-[11px] font-bold text-indigo-500 uppercase tracking-widest mb-1 leading-none">Total Members: ${members.length}</p>
+              <h2 class="text-2xl font-black text-slate-900 leading-tight">계정 관리</h2>
+              <p class="text-[11px] text-indigo-500 font-bold mt-2 flex items-center gap-1">
+                ${icons.alert} 허용 도메인: @${ws.allowedDomains.join(', ')} (해당 도메인 계정만 관리자로 등록 가능합니다.)
+              </p>
+            </div>
+            <button data-action="open-invite" class="bg-[#5C5CFF] hover:bg-[#4B4BFF] text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-100">
+              ${icons.plus} 팀원 초대하기
+            </button>
+          </div>
+
+          <!-- 필터 툴바 -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center gap-3">
+            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 shrink-0 w-full lg:w-auto">
+              <span class="text-slate-400 p-2">${icons.shield}</span>
+              <select onchange="state.memberFilterRole = this.value; render();" 
+                      class="bg-transparent py-2 pr-4 text-sm font-bold text-slate-600 outline-none w-full">
+                <option value="all" ${state.memberFilterRole === 'all' ? 'selected' : ''}>전체 역할</option>
+                <option value="admin" ${state.memberFilterRole === 'admin' ? 'selected' : ''}>Admin</option>
+                <option value="editor" ${state.memberFilterRole === 'editor' ? 'selected' : ''}>Editor</option>
+                <option value="viewer" ${state.memberFilterRole === 'viewer' ? 'selected' : ''}>Viewer</option>
+              </select>
+            </div>
+
+            <div class="relative flex-1 w-full">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">${icons.search}</span>
+              <input type="text" placeholder="사용자명 또는 이메일로 검색" 
+                     value="${state.memberSearchQuery}"
+                     oninput="state.memberSearchQuery = this.value; render();"
+                     class="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium" />
+            </div>
+
+            <div class="px-4 py-2 bg-indigo-50 rounded-xl border border-indigo-100 hidden lg:block text-center whitespace-nowrap">
+              <span class="text-[10px] font-black text-indigo-400 uppercase block leading-none mb-1 text-center">Results</span>
+              <span class="text-sm font-black text-indigo-600 leading-none tabular-nums">${filtered.length}</span>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible text-[13px]">
+            <table class="w-full text-left">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">사용자 정보</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">워크스페이스 역할</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">서비스 별 권한</th>
+                  <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">관리</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${filtered.map(m => `
+                  <tr class="group hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-[11px] uppercase">${m.name[0]}</div>
+                        <div>
+                          <p class="font-bold text-slate-800">${m.name}</p>
+                          <p class="text-[11px] text-slate-400 font-medium">${m.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                       <div class="inline-flex relative">
+                         <span class="font-bold text-indigo-600 text-xs">${(m.role || 'viewer').toUpperCase()}</span>
+                         ${isCustomized(m) ? `
+                            <div class="absolute -top-1 -right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white ripple" title="기능 권한 개별 수정됨"></div>
+                         ` : ''}
+                       </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                       <div class="flex justify-center items-center gap-2">
+                         ${renderServiceCleanIcons(m)}
+                       </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-3">
+                        <button data-action="open-edit-member" data-member-id="${m.id}" class="text-slate-400 hover:text-indigo-600 transition-all hover:scale-110" title="권한 수정">
+                          ${icons.edit}
+                        </button>
+                        <button data-action="open-delete-member" data-member-id="${m.id}" class="text-slate-400 hover:text-rose-600 transition-all hover:scale-110" title="계정 삭제">
+                          ${icons.trash}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInviteModal(ws) {
+      return `
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 fade-in" data-action="close-modal-bg">
+          <div class="bg-white w-[420px] rounded-[32px] shadow-2xl p-10 space-y-8" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start text-slate-900">
+              <div>
+                <h3 class="text-[24px] font-black leading-none">사용자 초대</h3>
+                <p class="text-[13px] text-slate-400 font-medium mt-3 leading-none">관리자 역할을 배정하여 초대합니다.</p>
+              </div>
+              <button data-action="close-invite" class="text-slate-300 hover:text-slate-600 transition-colors">${icons.x}</button>
+            </div>
+            
+            <div class="space-y-6 text-sm text-slate-800">
+              <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none">Email Address</label>
+                <input type="email" id="invite-email" placeholder="example@${ws.allowedDomains[0]}" class="w-full bg-[#F3F6F9] border border-slate-100 px-5 py-4 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium" />
+                <p class="text-[11px] text-[#5C5CFF] font-bold ml-1 flex items-center gap-1.5 mt-2">
+                   ${icons.info} @${ws.allowedDomains.join(', ')} 도메인만 초대 가능
+                </p>
+              </div>
+
+              <div class="space-y-4">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none">Service Default Roles</label>
+                <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                  ${(getWorkspaceServices(ws)).map(srv => `
+                    <div class="flex items-center justify-between bg-[#F3F6F9] border border-slate-100 px-5 py-3.5 rounded-2xl group hover:border-indigo-100 transition-colors">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-base">${srv.icon}</div>
+                        <span class="text-[13px] font-bold text-slate-700">${srv.name}</span>
+                      </div>
+                      <div class="relative min-w-[100px]">
+                        <select class="invite-service-role-select w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 outline-none text-[11px] font-black text-indigo-600 appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all hover:bg-slate-50" data-service-id="${srv.id}">
+                          <option value="admin" selected>ADMIN</option>
+                          <option value="editor">EDITOR</option>
+                          <option value="viewer">VIEWER</option>
+                        </select>
+                        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 text-indigo-600 scale-75">${icons.chevronDown}</div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-col gap-3">
+              <button data-action="confirm-invite" class="w-full bg-[#5C5CFF] hover:bg-[#4B4BFF] text-white py-4 rounded-[20px] font-black text-[15px] shadow-xl shadow-indigo-100 transition-all">초대장 발송</button>
+              <button data-action="close-invite" class="w-full py-2 text-slate-400 font-bold text-[13px] hover:text-slate-600 transition-colors">취소</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEditModal() {
+      const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+      if (!member) return '';
+      const services = state.currentWorkspace ? getWorkspaceServices(state.currentWorkspace) : [];
+
+      return `
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4" data-action="close-edit-modal-bg">
+          <div class="w-full max-w-lg bg-white rounded-[40px] shadow-2xl flex flex-col overflow-hidden fade-in relative max-h-[85vh]" onclick="event.stopPropagation()">
+            
+            <div class="p-10 pb-6 text-center shrink-0">
+              <button data-action="close-edit-modal" class="absolute top-8 right-8 text-slate-300 hover:text-slate-600 transition-colors">${icons.x}</button>
+              <h3 class="text-2xl font-black text-slate-900 leading-tight">권한 수정</h3>
+              <p class="text-sm text-slate-400 mt-2 font-medium">${member.name} (${member.email})</p>
+            </div>
+
+            <div id="modal-scroll-area" class="flex-1 overflow-y-auto px-10 pb-4 custom-scrollbar space-y-10">
+              
+              <div class="space-y-4 pb-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">서비스별 상세 권한 설정</p>
+                </div>
+                <div class="space-y-2">
+                  ${services.map(svc => renderAccordionItem(svc, member)).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="p-8 pt-4 pb-8 space-y-4 text-center shrink-0 bg-white border-t border-slate-50">
+              <button data-action="save-edit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-[20px] shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all text-sm">저장하기</button>
+              <button data-action="close-edit-modal" class="text-[13px] font-bold text-slate-400 hover:text-slate-600">취소</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAccordionItem(svc, member) {
+      const isExpanded = state.expandedServices.has(svc.id);
+      const memberSrv = member.services?.find(ms => ms.id === svc.id);
+      const isEnabled = !!memberSrv;
+      
+      return `
+        <div class="border border-slate-100 rounded-[28px] overflow-hidden transition-all ${isExpanded ? 'bg-slate-50/30 ring-1 ring-slate-100 shadow-sm' : 'bg-white'}">
+          <div class="flex items-center justify-between px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="text-xl">${svc.icon}</div>
+              <p class="font-black text-slate-800 text-[14px] leading-tight">${svc.name}</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <label class="switch">
+                <input type="checkbox" ${isEnabled ? 'checked' : ''} data-action="toggle-edit-service" data-service-id="${svc.id}">
+                <span class="slider"></span>
+              </label>
+              <button data-action="toggle-accordion" data-id="${svc.id}" 
+                      class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 transition-all text-slate-300 ${isExpanded ? 'rotate-180' : ''}">
+                ${icons.chevronDown}
+              </button>
+            </div>
+          </div>
+
+          <div class="${isExpanded ? 'block' : 'hidden'} bg-white border-t border-slate-50 px-5 py-3 space-y-1.5 slide-down">
+            ${svc.features ? svc.features.map(feat => {
+              const featPerm = memberSrv?.features?.find(f => f.id === feat.id);
+              const currentRole = featPerm ? featPerm.role : (memberSrv?.role || member.role || 'viewer');
+              return `
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 group gap-2">
+                  <span class="text-[13px] font-bold ${isEnabled ? 'text-slate-600 group-hover:text-slate-900' : 'text-slate-300'} transition-colors leading-tight">${feat.name}</span>
+                  
+                  <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl ${!isEnabled ? 'opacity-20 pointer-events-none' : ''}">
+                    ${['admin', 'editor', 'viewer'].map(role => `
+                      <button data-action="set-feature-role" data-service-id="${svc.id}" data-feature-id="${feat.id}" data-role="${role}"
+                              class="role-btn ${currentRole.toLowerCase() === role ? 'active ' + role : ''}">
+                        ${role.toUpperCase()}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('') : `<div class="py-4 text-center text-[11px] text-slate-400 font-medium">하위 기능이 없습니다.</div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDeleteModal() {
+      const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+      return `
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 fade-in" data-action="close-delete-modal-bg">
+          <div class="bg-white w-full max-w-sm rounded-[32px] shadow-2xl p-10 text-center space-y-6 text-slate-900">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto text-3xl">🗑️</div>
+            <div>
+              <h3 class="text-[22px] font-black leading-none">계정 삭제</h3>
+              <p class="text-[14px] text-slate-500 font-medium mt-4 leading-relaxed">
+                <span class="font-bold text-slate-900">${member?.name}</span>님의 계정을 삭제하시겠습니까?<br/>
+                이 작업은 되돌릴 수 없습니다.
+              </p>
+            </div>
+            <div class="flex gap-3 pt-2">
+              <button data-action="close-delete-modal" class="flex-1 py-4 bg-slate-50 text-slate-400 font-bold rounded-2xl hover:bg-slate-100 transition-all text-[14px]">취소</button>
+              <button data-action="confirm-delete" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-4 rounded-2xl font-bold transition-all text-[14px] shadow-lg shadow-rose-100">삭제</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ──────────────────────────────────────────
+    // Views — Super Admin (테넌트/멤버/서비스 통합 관리)
+    // ──────────────────────────────────────────
+
+    function renderSuperAdmin() {
+      const tab = state.superAdminTab;
+      return `
+        <div class="min-h-screen bg-slate-50 fade-in">
+          <!-- Top Bar -->
+          <div class="bg-white border-b border-slate-200 px-8 py-0">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+              <div class="flex items-center gap-6">
+                <button data-action="goto-workspace-selection" class="flex items-center gap-2 text-slate-400 hover:text-slate-700 transition-colors py-5">
+                  ${icons.arrowLeft}
+                  <span class="text-sm font-medium">워크스페이스 선택</span>
+                </button>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">M</div>
+                  <span class="font-bold text-lg text-slate-900">MAIS AI Hub</span>
+                  <span class="ml-1 px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded-full uppercase">Super Admin</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-sm border border-purple-200">박</div>
+                <button data-action="logout" class="text-slate-400 hover:text-red-500 transition-colors">${icons.logOut}</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="bg-white border-b border-slate-200 px-8">
+            <div class="max-w-6xl mx-auto flex gap-0">
+              <button data-action="sa-tab" data-tab="tenants"
+                      class="px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${tab === 'tenants' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}">
+                <span class="flex items-center gap-2">${icons.building} 테넌트 관리</span>
+              </button>
+              <button data-action="sa-tab" data-tab="members"
+                      class="px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${tab === 'members' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}">
+                <span class="flex items-center gap-2">${icons.users} 멤버 관리</span>
+              </button>
+              <button data-action="sa-tab" data-tab="services"
+                      class="px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${tab === 'services' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}">
+                <span class="flex items-center gap-2">${icons.layers} 서비스 카탈로그</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="px-8 py-8">
+            <div class="max-w-6xl mx-auto">
+              ${tab === 'tenants' ? renderSATenantsTab() : ''}
+              ${tab === 'members' ? renderSAMembersTab() : ''}
+              ${tab === 'services' ? renderSAServicesTab() : ''}
+            </div>
+          </div>
+
+          <!-- Modals -->
+          ${state.isCreateTenantModalOpen ? renderCreateTenantModal() : ''}
+          ${state.isServiceManageModalOpen ? renderServiceManageModal() : ''}
+          ${state.isAddMemberToTenantModalOpen ? renderAddMemberToTenantModal() : ''}
+          ${state.isCreateServiceModalOpen ? renderCreateServiceModal() : ''}
+          ${state.isEditServiceModalOpen ? renderEditServiceModal() : ''}
+          ${state.isEditTenantModalOpen ? renderEditTenantModal() : ''}
+        </div>`;
+    }
+
+    // ── SA: 테넌트 관리 탭 ──
+
+    function renderSATenantsTab() {
+      return `
+        <div class="flex justify-between items-end mb-8">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">테넌트 관리</h2>
+            <p class="text-slate-500 mt-1">워크스페이스(사업본부)를 생성·수정하고 서비스를 할당합니다.</p>
+          </div>
+          <button data-action="open-create-tenant" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-200/50">
+            ${icons.plus} <span>새 테넌트 생성</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          ${workspaces.map(ws => {
+        const members = getMembersForWorkspace(ws.id);
+        const services = getWorkspaceServices(ws);
+        return `
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+              <!-- Card Header -->
+              <div class="p-6 pb-4">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 ${ws.color} rounded-xl flex items-center justify-center text-lg font-bold text-white">${ws.logo}</div>
+                    <div>
+                      <h3 class="text-lg font-bold text-slate-900">${ws.name}</h3>
+                      <p class="text-[11px] text-slate-400 mt-0.5">생성일: ${ws.createdAt}</p>
+                    </div>
+                  </div>
+                  <button data-action="open-edit-tenant" data-tenant-id="${ws.id}" class="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400" title="수정">
+                    ${icons.edit}
+                  </button>
+                </div>
+
+                <!-- Stats (Fixed Height for Alignment) -->
+                <div class="grid grid-cols-2 gap-3 mb-4 h-[64px]">
+                  <div class="bg-slate-50 rounded-lg p-3 text-center flex flex-col justify-center">
+                    <div class="text-xl font-bold text-slate-900">${members.length}</div>
+                    <div class="text-[11px] text-slate-500 font-medium leading-none mt-1">멤버</div>
+                  </div>
+                  <div class="bg-slate-50 rounded-lg p-3 text-center flex flex-col justify-center">
+                    <div class="text-xl font-bold text-slate-900">${services.length}</div>
+                    <div class="text-[11px] text-slate-500 font-medium leading-none mt-1">활성 서비스</div>
+                  </div>
+                </div>
+
+                <!-- Domains (Min-height for Consistency) -->
+                <div class="mb-4 min-h-[48px]">
+                  <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">허용 도메인</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${ws.allowedDomains.map(d => `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">${d}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Services -->
+              <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 min-h-[100px]">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">활성 서비스</div>
+                  <button data-action="open-service-manage" data-tenant-id="${ws.id}" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1">
+                    ${icons.settings} 관리
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  ${services.map(s => `
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold border border-emerald-100">
+                    ${s.icon} ${s.name}
+                  </span>`).join('')}
+                </div>
+              </div>
+
+              <!-- Members Preview -->
+              <div class="px-6 py-4 border-t border-slate-100 min-h-[140px]">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">최근 멤버</div>
+                  <button data-action="sa-tab-members-filter" data-filter="${ws.id}" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1">
+                    전체 보기 ${icons.externalLink}
+                  </button>
+                </div>
+                <div class="space-y-2">
+                  ${members.slice(0, 3).map(m => `
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                       <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">${m.name[0]}</div>
+                       <span class="text-sm text-slate-700 font-medium">${m.name}</span>
+                    </div>
+                    ${getRoleBadge(m.role)}
+                  </div>`).join('')}
+                  ${members.length > 3 ? `<p class="text-xs text-slate-400 text-center pt-1">외 ${members.length - 3}명</p>` : ''}
+                  ${members.length === 0 ? `<p class="text-xs text-slate-400 text-center py-4 italic">소속 멤버 없음</p>` : ''}
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex gap-2 mt-auto">
+                <button data-action="select-workspace" data-workspace-id="${ws.id}" class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition-colors">
+                  ${icons.externalLink} 워크스페이스 진입
+                </button>
+                <button data-action="open-add-member-to-tenant" data-tenant-id="${ws.id}" class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors">
+                  ${icons.userPlus} 멤버 추가
+                </button>
+              </div>
+            </div>`;
+      }).join('')}
+        </div>`;
+    }
+
+    // ── SA: 멤버 관리 탭 ──
+
+    // [2] 멤버 통합 조회 (툴바형 복합 필터)
+    // ──────────────────────────────────────────
+    function renderSAMembersTab() {
+      const filteredMembers = state.allMembers.filter(m => {
+        const roleMatch = state.memberFilterRole === 'all' || m.role === state.memberFilterRole;
+        const wsMatch = state.memberFilterWorkspace === 'all' || m.tenants.includes(state.memberFilterWorkspace);
+        const searchMatch = m.name.includes(state.memberSearchQuery) || m.email.includes(state.memberSearchQuery);
+        return roleMatch && wsMatch && searchMatch;
+      });
+
+      return `
+        <div>
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-slate-900 mb-1">멤버 통합 조회</h2>
+            <p class="text-sm text-slate-500 font-medium">시스템 가입자 권한 및 소속을 글로벌 단위로 제어합니다.</p>
+          </div>
+
+          <!-- 툴바 필터: 역할 -> 본부 -> 검색 -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-4 flex flex-col lg:flex-row items-center gap-3">
+            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 shrink-0 w-full lg:w-auto">
+              <span class="text-slate-400 p-2">${icons.shield}</span>
+              <select onchange="state.memberFilterRole = this.value; render();" 
+                      class="bg-transparent py-2 pr-4 text-sm font-bold text-slate-600 outline-none w-full">
+                <option value="all" ${state.memberFilterRole === 'all' ? 'selected' : ''}>전체 역할</option>
+                <option value="super_admin" ${state.memberFilterRole === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+                <option value="admin" ${state.memberFilterRole === 'admin' ? 'selected' : ''}>Admin</option>
+                <option value="editor" ${state.memberFilterRole === 'editor' ? 'selected' : ''}>Editor</option>
+                <option value="viewer" ${state.memberFilterRole === 'viewer' ? 'selected' : ''}>Viewer</option>
+              </select>
+            </div>
+
+            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 shrink-0 w-full lg:w-auto">
+              <span class="text-slate-400 p-2">${icons.tenant}</span>
+              <select onchange="state.memberFilterWorkspace = this.value; render();"
+                      class="bg-transparent py-2 pr-4 text-sm font-bold text-slate-600 outline-none w-full">
+                <option value="all" ${state.memberFilterWorkspace === 'all' ? 'selected' : ''}>전체 워크스페이스</option>
+                ${state.workspaces.map(ws => `<option value="${ws.id}" ${state.memberFilterWorkspace === ws.id ? 'selected' : ''}>${ws.name}</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="relative flex-1 w-full">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">${icons.search}</span>
+              <input type="text" placeholder="사용자명 또는 이메일로 검색" 
+                     value="${state.memberSearchQuery}"
+                     oninput="state.memberSearchQuery = this.value; render();"
+                     class="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium" />
+            </div>
+
+            <div class="px-4 py-2 bg-indigo-50 rounded-xl border border-indigo-100 hidden lg:block text-center">
+              <span class="text-[10px] font-black text-indigo-400 uppercase block leading-none mb-1 text-center">Results</span>
+              <span class="text-sm font-black text-indigo-600 leading-none tabular-nums">${filteredMembers.length}</span>
+            </div>
+          </div>
+
+          <!-- 멤버 테이블 -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-400">
+                <tr>
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">사용자 계정</th>
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">글로벌 역할</th>
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">활성 본부</th>
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-center">관리</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${filteredMembers.map(m => `
+                  <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <td class="px-6 py-4">
+                      <div>
+                        <p class="font-bold text-slate-800 text-sm">${m.name}</p>
+                        <p class="text-[11px] text-slate-400 font-medium">${m.email}</p>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">${getRoleBadge(m.role)}</td>
+                    <td class="px-6 py-4">
+                      <div class="flex flex-wrap gap-1">
+                        ${m.tenants.map(tid => {
+        const ws = state.workspaces.find(w => w.id === tid);
+        return ws ? `<span class="px-1.5 py-0.5 rounded bg-white text-[10px] font-bold text-slate-500 border border-slate-200 shadow-sm">${ws.name}</span>` : '';
+      }).join('')}
+                      </div>
+                    </td>
+                    <!-- 관리 기능 아이콘 복원 -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-3">
+                        <button class="text-slate-400 hover:text-indigo-600 transition-colors" title="워크스페이스 추가">${icons.userPlus}</button>
+                        <button class="text-slate-400 hover:text-indigo-600 transition-colors" title="권한 수정">${icons.edit}</button>
+                        <button class="text-slate-400 hover:text-red-500 transition-colors" title="삭제">${icons.trash}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── SA: 서비스 카탈로그 탭 ──
+
+    // [3] 서비스 카탈로그 (매트릭스 뷰)
+    // ──────────────────────────────────────────
+    function renderSAServicesTab() {
+      return `
+        <div class="flex justify-between items-end mb-8">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900">서비스 카탈로그</h2>
+            <p class="text-slate-500 mt-1 font-medium">글로벌 AI 서비스 엔진을 등록하고 각 테넌트별 배포를 제어합니다.</p>
+          </div>
+          <button data-action="open-service-modal" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-200/50">
+            ${icons.plus} <span>서비스 추가</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          ${state.allServices.map(s => `
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col group hover:border-indigo-200 transition-all">
+              <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-50 transition-colors">${s.icon}</div>
+                    <div>
+                      <h3 class="font-bold text-slate-900">${s.name}</h3>
+                      <p class="text-xs text-slate-400">${s.desc}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button data-action="open-edit-service" data-service-id="${s.id}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="수정">
+                      ${icons.edit}
+                    </button>
+                    <button data-action="delete-service" data-service-id="${s.id}" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="삭제">
+                      ${icons.trash}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-50/50 p-6 border-t border-slate-100 space-y-3 flex-1">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">본부별 배포 상태</p>
+                ${state.workspaces.map(ws => {
+        const isEnabled = ws.enabledServiceIds.includes(s.id);
+        return `
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-slate-700">${ws.name}</span>
+                      <div class="relative inline-block w-8 h-4 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" ${isEnabled ? 'checked' : ''} class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                        <label class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer"></label>
+                      </div>
+                    </div>`;
+      }).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ──────────────────────────────────────────
+    // Modals — Super Admin
+    // ──────────────────────────────────────────
+
+    function renderEditTenantModal() {
+      const ws = workspaces.find(w => w.id === state.selectedTenantId);
+      if (!ws) return '';
+
+      return `
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-action="close-edit-tenant">
+          <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-6 border-b border-slate-50">
+              <h3 class="text-xl font-bold text-slate-900">테넌트 정보 수정</h3>
+              <button data-action="close-edit-tenant" class="text-slate-400 hover:text-slate-900 transition-colors">${icons.x}</button>
+            </div>
+            <form onsubmit="handleEditTenant(event)" class="p-6 space-y-5">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">워크스페이스 이름</label>
+                <input id="editTenantName" type="text" value="${ws.name}" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">로고 텍스트</label>
+                  <input id="editTenantLogo" type="text" value="${ws.logo}" maxlength="2" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center font-black" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">테마 컬러</label>
+                  <select id="editTenantColor" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white font-medium">
+                    <option value="bg-blue-600" ${ws.color === 'bg-blue-600' ? 'selected' : ''}>🔵 파란색 (Blue)</option>
+                    <option value="bg-emerald-600" ${ws.color === 'bg-emerald-600' ? 'selected' : ''}>🟢 초록색 (Emerald)</option>
+                    <option value="bg-amber-600" ${ws.color === 'bg-amber-600' ? 'selected' : ''}>🟠 주황색 (Amber)</option>
+                    <option value="bg-purple-600" ${ws.color === 'bg-purple-600' ? 'selected' : ''}>🟣 보라색 (Purple)</option>
+                    <option value="bg-rose-600" ${ws.color === 'bg-rose-600' ? 'selected' : ''}>🔴 빨간색 (Rose)</option>
+                    <option value="bg-slate-600" ${ws.color === 'bg-slate-600' ? 'selected' : ''}>⚫ 회색 (Slate)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">허용 이메일 도메인</label>
+                <input id="editTenantDomains" type="text" value="${ws.allowedDomains.join(', ')}" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-medium" />
+                <p class="mt-1 text-xs text-slate-400">쉼표로 구분하여 입력 (예: megastudy.net, abc.com)</p>
+              </div>
+              <div class="pt-4 flex gap-3">
+                <button type="button" data-action="close-edit-tenant" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all">취소</button>
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-200/50">수정 완료</button>
+              </div>
+            </form>
+          </div>
+        </div>`;
+    }
+
+    window.handleEditTenant = (e) => {
+      e.preventDefault();
+      const ws = workspaces.find(w => w.id === state.selectedTenantId);
+      if (!ws) return;
+
+      ws.name = document.getElementById('editTenantName').value;
+      ws.logo = document.getElementById('editTenantLogo').value;
+      ws.color = document.getElementById('editTenantColor').value;
+      ws.allowedDomains = document.getElementById('editTenantDomains').value.split(',').map(d => d.trim()).filter(d => d);
+
+      state.isEditTenantModalOpen = false;
+      state.selectedTenantId = null;
+      alert('테넌트 정보가 성공적으로 수정되었습니다.');
+      render();
+    };
+
+    function renderCreateTenantModal() {
+      return `
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-action="close-create-tenant">
+          <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-6 pb-0">
+              <h3 class="text-xl font-bold text-slate-900">새 테넌트(워크스페이스) 생성</h3>
+              <button data-action="close-create-tenant" class="text-slate-400 hover:text-slate-900 transition-colors">${icons.x}</button>
+            </div>
+            <div class="p-6 space-y-5">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">워크스페이스 이름</label>
+                <input type="text" placeholder="예: 메가공무원" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">로고 텍스트</label>
+                  <input type="text" placeholder="예: 공" maxlength="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">테마 컬러</label>
+                  <select class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none bg-white">
+                    <option>🔵 파란색 (Blue)</option>
+                    <option>🟢 초록색 (Emerald)</option>
+                    <option>🟠 주황색 (Amber)</option>
+                    <option>🟣 보라색 (Purple)</option>
+                    <option>🔴 빨간색 (Rose)</option>
+                    <option>⚫ 회색 (Slate)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">허용 이메일 도메인</label>
+                <input type="text" placeholder="예: megagosi.co.kr, megastudy.net" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                <p class="mt-1 text-xs text-slate-400">쉼표로 구분하여 여러 도메인을 입력할 수 있습니다.</p>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">활성화할 서비스</label>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                  ${allServices.map(svc => `
+                  <label class="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all">
+                    <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                    <span class="text-sm font-medium text-slate-700">${svc.icon} ${svc.name}</span>
+                  </label>`).join('')}
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">초기 Admin 계정 (선택)</label>
+                <input type="email" placeholder="admin@megagosi.co.kr" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                <p class="mt-1 text-xs text-slate-400">입력하면 해당 이메일로 Admin 초대가 자동 발송됩니다.</p>
+              </div>
+            </div>
+            <div class="flex gap-3 p-6 pt-2">
+              <button data-action="close-create-tenant" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">취소</button>
+              <button data-action="confirm-create-tenant" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200/50">테넌트 생성</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderServiceManageModal() {
+      const ws = workspaces.find(w => w.id === state.selectedTenantForService);
+      if (!ws) return '';
+
+      return `
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-action="close-service-manage">
+          <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-6 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 ${ws.color} rounded-xl flex items-center justify-center text-base font-bold text-white">${ws.logo}</div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">${ws.name} — 서비스 관리</h3>
+                  <p class="text-xs text-slate-500">서비스를 활성화/비활성화합니다.</p>
+                </div>
+              </div>
+              <button data-action="close-service-manage" class="text-slate-400 hover:text-slate-900 transition-colors">${icons.x}</button>
+            </div>
+            <div class="p-6 space-y-3">
+              ${allServices.map(svc => {
+        const isEnabled = ws.enabledServiceIds.includes(svc.id);
+        return `
+                <div class="flex items-center justify-between p-4 rounded-xl border ${isEnabled ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/30'}">
+                  <div class="flex items-center gap-3">
+                    <span class="text-xl">${svc.icon}</span>
+                    <div>
+                      <div class="font-semibold text-sm text-slate-900">${svc.name}</div>
+                      <div class="text-[11px] text-slate-500">${svc.desc}</div>
+                    </div>
+                  </div>
+                  <div class="toggle-track ${isEnabled ? 'on' : 'off'}" role="switch">
+                    <div class="toggle-thumb"></div>
+                  </div>
+                </div>`;
+      }).join('')}
+            </div>
+            <div class="flex gap-3 p-6 pt-2 border-t border-slate-100">
+              <button data-action="close-service-manage" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">닫기</button>
+              <button data-action="close-service-manage" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200/50">변경사항 저장</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderCreateServiceModal() {
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+          <div class="modal-backdrop absolute inset-0" data-action="close-service-modal"></div>
+          <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden relative z-10 border border-slate-200">
+            <div class="px-8 py-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+              <div>
+                <h3 class="text-xl font-black text-slate-900 leading-none">신규 서비스 등록</h3>
+                <p class="text-[12px] text-slate-400 font-medium mt-3 leading-none">시스템에 새로운 AI 서비스 엔진을 추가합니다.</p>
+              </div>
+              <button data-action="close-service-modal" class="p-2 hover:bg-white text-slate-300 hover:text-slate-600 rounded-xl transition-colors">
+                ${icons.x}
+              </button>
+            </div>
+            
+            <form onsubmit="handleCreateService(event)" class="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none block">서비스 이름</label>
+                <input required id="serviceName" type="text" placeholder="예: 맞춤형 문제 생성" 
+                       class="w-full px-5 py-4 bg-slate-50/50 border-2 border-slate-50 rounded-[20px] outline-none focus:border-indigo-100 focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none block">서비스 설명</label>
+                <textarea required id="serviceDesc" rows="3" placeholder="주요 기능을 상세히 설명해주세요." 
+                       class="w-full px-5 py-4 bg-slate-50/50 border-2 border-slate-50 rounded-[24px] outline-none focus:border-indigo-100 focus:bg-white transition-all text-sm font-medium resize-none placeholder:text-slate-300"></textarea>
+              </div>
+              <div class="space-y-3 pt-4 border-t border-slate-50">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none block">워크스페이스 배포 설정</label>
+                <div class="grid grid-cols-1 gap-2">
+                  ${workspaces.map(ws => `
+                    <label class="flex items-center justify-between p-4 bg-slate-50/50 hover:bg-indigo-50/30 rounded-[20px] cursor-pointer transition-all border-2 border-transparent hover:border-indigo-50 group">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 ${ws.color} rounded-xl flex items-center justify-center text-[10px] font-black text-white shadow-sm ring-4 ring-white">${ws.logo}</div>
+                        <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">${ws.name}</span>
+                      </div>
+                      <input type="checkbox" name="ws-target" value="${ws.id}" class="custom-checkbox appearance-none w-5 h-5 rounded-lg border-2 border-slate-200 cursor-pointer transition-all" />
+                    </label>
+                  `).join('')}
+                </div>
+              </div>
+              <div class="flex flex-col gap-3 pt-4 sticky bottom-0 bg-white">
+                <button type="submit" class="w-full py-4 bg-[#5C5CFF] text-white font-black rounded-[20px] shadow-xl shadow-indigo-100 hover:bg-[#4B4BFF] transition-all text-[15px]">등록 완료</button>
+                <button type="button" data-action="close-service-modal" class="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">취소</button>
+              </div>
+            </form>
+          </div>
+        </div>`;
+    }
+
+    function renderEditServiceModal() {
+      const svc = state.allServices.find(s => s.id === state.selectedServiceId);
+      if (!svc) return '';
+
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+          <div class="modal-backdrop absolute inset-0" data-action="close-edit-service-modal"></div>
+          <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden relative z-10 border border-slate-200">
+            <div class="px-8 py-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+              <div>
+                <h3 class="text-xl font-black text-slate-900 leading-none">서비스 정보 수정</h3>
+                <p class="text-[12px] text-slate-400 font-medium mt-3 leading-none">${svc.name} 엔진의 기본 정보를 수정합니다.</p>
+              </div>
+              <button data-action="close-edit-service-modal" class="p-2 hover:bg-white text-slate-300 hover:text-slate-600 rounded-xl transition-colors">
+                ${icons.x}
+              </button>
+            </div>
+            
+            <form onsubmit="handleEditService(event)" class="p-8 space-y-6">
+              <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none block">서비스 이름</label>
+                <input required id="editServiceName" type="text" value="${svc.name}" 
+                       class="w-full px-5 py-4 bg-slate-50/50 border-2 border-slate-50 rounded-[20px] outline-none focus:border-indigo-100 focus:bg-white transition-all text-sm font-bold" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1 leading-none block">서비스 설명</label>
+                <textarea required id="editServiceDesc" rows="3" 
+                       class="w-full px-5 py-4 bg-slate-50/50 border-2 border-slate-50 rounded-[24px] outline-none focus:border-indigo-100 focus:bg-white transition-all text-sm font-medium resize-none">${svc.desc}</textarea>
+              </div>
+              
+              <div class="flex flex-col gap-3 pt-4">
+                <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-[20px] shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all text-[15px]">수정 완료</button>
+                <button type="button" data-action="close-edit-service-modal" class="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors">취소</button>
+              </div>
+            </form>
+          </div>
+        </div>`;
+    }
+
+    window.handleEditService = (e) => {
+      e.preventDefault();
+      const name = document.getElementById('editServiceName').value;
+      const desc = document.getElementById('editServiceDesc').value;
+
+      const svc = state.allServices.find(s => s.id === state.selectedServiceId);
+      if (svc) {
+        svc.name = name;
+        svc.desc = desc;
+      }
+
+      state.isEditServiceModalOpen = false;
+      state.selectedServiceId = null;
+      alert('서비스 정보가 수정되었습니다.');
+      render();
+    };
+
+    window.handleCreateService = (e) => {
+      e.preventDefault();
+      const name = document.getElementById('serviceName').value;
+      const desc = document.getElementById('serviceDesc').value;
+      const selectedWsIds = Array.from(document.querySelectorAll('input[name="ws-target"]:checked')).map(cb => cb.value);
+
+      const newServiceId = `service_${Date.now()}`;
+      state.allServices.push({
+        id: newServiceId,
+        name,
+        desc,
+        icon: '✨',
+        subMenus: ['설정 관리', '데이터 분석'], // 기본 서브메뉴
+        features: [{ id: `feat-${Date.now()}`, name: '기본 기능' }] // 기본 피처
+      });
+
+      state.workspaces.forEach(ws => {
+        if (selectedWsIds.includes(ws.id)) ws.enabledServiceIds.push(newServiceId);
+      });
+
+      state.isCreateServiceModalOpen = false;
+      alert('새 서비스가 등록되었습니다.');
+      render();
+    };
+
+    function renderAddMemberToTenantModal() {
+      const ws = workspaces.find(w => w.id === state.selectedTenantForMember);
+      if (!ws) return '';
+
+      // 현재 이 워크스페이스에 소속되지 않은 기존 멤버 목록
+      const availableMembers = allMembers.filter(m => !m.tenants.includes(ws.id));
+
+      return `
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-action="close-add-member">
+          <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl fade-in" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center p-6 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 ${ws.color} rounded-xl flex items-center justify-center text-base font-bold text-white">${ws.logo}</div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">${ws.name} — 멤버 추가</h3>
+                  <p class="text-xs text-slate-500">기존 멤버를 이 워크스페이스에 추가하거나 새로 초대합니다.</p>
+                </div>
+              </div>
+              <button data-action="close-add-member" class="text-slate-400 hover:text-slate-900 transition-colors">${icons.x}</button>
+            </div>
+
+            <!-- 기존 멤버 검색 추가 -->
+            <div class="p-6 pb-3">
+              <div class="text-xs font-bold text-slate-500 mb-3 uppercase">기존 멤버를 워크스페이스에 추가</div>
+              <div class="relative mb-4">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">${icons.search}</span>
+                <input type="text" placeholder="이름 또는 이메일로 검색..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm" />
+              </div>
+              ${availableMembers.length > 0 ? `
+              <div class="space-y-2 max-h-48 overflow-y-auto">
+                ${availableMembers.map(m => `
+                <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-600">${m.name[0]}</div>
+                    <div>
+                      <div class="text-sm font-medium text-slate-900">${m.name}</div>
+                      <div class="text-[11px] text-slate-400">${m.email}</div>
+                    </div>
+                  </div>
+                  <button class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all">추가</button>
+                </div>`).join('')}
+              </div>
+              ` : `
+              <div class="text-center py-6 text-slate-400">
+                <p class="text-sm">모든 멤버가 이미 이 워크스페이스에 소속되어 있습니다.</p>
+              </div>
+              `}
+            </div>
+
+            <!-- 새 멤버 초대 -->
+            <div class="px-6 py-4 border-t border-slate-100">
+              <div class="text-xs font-bold text-slate-500 mb-3 uppercase">또는 새 멤버 초대</div>
+              <div class="flex gap-2">
+                <input type="email" placeholder="new@${ws.allowedDomains[0]}" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm" />
+                <select class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm appearance-none bg-white">
+                  <option>Admin</option>
+                  <option selected>Editor</option>
+                  <option>Viewer</option>
+                </select>
+                <button class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all">초대</button>
+              </div>
+              <p class="mt-1.5 text-[11px] text-slate-400">허용 도메인: ${ws.allowedDomains.join(', ')}</p>
+            </div>
+
+            <div class="p-6 pt-3 border-t border-slate-100">
+              <button data-action="close-add-member" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">닫기</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ──────────────────────────────────────────
+    // Event Binding
+    // ──────────────────────────────────────────
+
+    function bindEvents() {
+      document.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', handleAction);
+      });
+    }
+
+    function handleAction(e) {
+      const el = e.currentTarget;
+      const action = el.dataset.action;
+      const dataset = el.dataset;
+
+      switch (action) {
+        case 'login':
+          if (state.isSuperAdmin) {
+            navigate('select-workspace');
+          } else {
+            state.currentWorkspace = workspaces[0];
+            state.activeSection = 'accounts';
+            navigate('admin-main');
+          }
+          break;
+        case 'forgot-password':
+          navigate('forgot-password');
+          break;
+        case 'back-to-login':
+          navigate('login');
+          break;
+        case 'send-reset':
+          alert('재설정 링크가 이메일로 발송되었습니다.');
+          navigate('login');
+          break;
+        case 'logout':
+          state.currentWorkspace = null;
+          state.activeServiceMenu = null;
+          state.activeSubMenu = null;
+          state.activeSection = 'service';
+          navigate('login');
+          break;
+        case 'select-workspace': {
+          const wsId = el.dataset.workspaceId;
+          const ws = workspaces.find(w => w.id === wsId);
+          state.activeServiceMenu = null;
+          state.activeSubMenu = null;
+          state.activeSection = 'service';
+          navigate('admin-main', { workspace: ws });
+          break;
+        }
+        case 'switch-workspace': {
+          const wsId = el.dataset.workspaceId;
+          const ws = workspaces.find(w => w.id === wsId);
+          state.activeServiceMenu = null;
+          state.activeSubMenu = null;
+          state.activeSection = 'service';
+          state.isWorkspaceDropdownOpen = false;
+          navigate('admin-main', { workspace: ws });
+          break;
+        }
+        case 'toggle-workspace-dropdown':
+          state.isWorkspaceDropdownOpen = !state.isWorkspaceDropdownOpen;
+          render();
+          break;
+        case 'goto-workspace-selection':
+          navigate('select-workspace');
+          break;
+        case 'toggle-service': {
+          const svcId = el.dataset.serviceId;
+          state.activeServiceMenu = state.activeServiceMenu === svcId ? null : svcId;
+          state.activeSubMenu = null;
+          state.activeSection = 'service';
+          render();
+          break;
+        }
+        case 'select-submenu':
+          state.activeSubMenu = el.dataset.submenu;
+          if (el.dataset.serviceId) state.activeServiceMenu = el.dataset.serviceId;
+          state.activeSection = 'service';
+          render();
+          break;
+        case 'goto-accounts':
+          state.activeSection = 'accounts';
+          state.activeServiceMenu = null;
+          state.activeSubMenu = null;
+          render();
+          break;
+
+        // Account / Permission actions
+        case 'toggle-action-menu': {
+          const mid = parseInt(el.dataset.memberId);
+          state.activeActionMenuId = state.activeActionMenuId === mid ? null : mid;
+          render();
+          break;
+        }
+        case 'open-edit-member': {
+          const mid = parseInt(dataset.memberId);
+          state.selectedMemberId = mid;
+          state.isEditModalOpen = true;
+          state.activeActionMenuId = null;
+
+          // Default all services to ON if member has no service settings
+          const member = state.allMembers.find(m => m.id === mid);
+          const workspaceServices = state.currentWorkspace ? getWorkspaceServices(state.currentWorkspace) : [];
+          if (member && (!member.services || member.services.length === 0)) {
+            member.services = workspaceServices.map(srv => ({
+              id: srv.id,
+              role: member.role || 'viewer',
+              features: srv.features ? srv.features.map(f => ({ id: f.id, role: member.role || 'viewer' })) : []
+            }));
+          }
+          render();
+          break;
+        }
+        case 'close-edit-modal':
+        case 'close-edit-modal-bg':
+          state.isEditModalOpen = false;
+          state.expandedServices.clear();
+          render();
+          break;
+        case 'toggle-accordion': {
+          const id = el.dataset.id;
+          if (state.expandedServices.has(id)) state.expandedServices.delete(id);
+          else state.expandedServices.add(id);
+          render();
+          break;
+        }
+        case 'save-edit':
+          alert('권한 변경사항이 저장되었습니다.');
+          state.isEditModalOpen = false;
+          render();
+          break;
+        case 'set-member-global-role': {
+          const role = dataset.role;
+          const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+          if (member) {
+            member.role = role;
+            render();
+          }
+          break;
+        }
+        case 'toggle-edit-service': {
+          const srvId = dataset.serviceId;
+          const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+          if (member) {
+            if (!member.services) member.services = [];
+            const idx = member.services.findIndex(s => s.id === srvId);
+            if (idx >= 0) {
+              member.services.splice(idx, 1);
+            } else {
+              const srv = state.allServices.find(s => s.id === srvId);
+              member.services.push({ 
+                id: srvId, 
+                role: member.role,
+                features: srv.features ? srv.features.map(f => ({ id: f.id, role: member.role, enabled: true })) : []
+              });
+            }
+            render();
+          }
+          break;
+        }
+        case 'set-service-role': {
+          const { serviceId, role } = dataset;
+          const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+          if (member) {
+            const srv = member.services?.find(s => s.id === serviceId);
+            if (srv) {
+              srv.role = role;
+              // Optional: Sync feature roles if they exist or just keep them independent
+              render();
+            }
+          }
+          break;
+        }
+
+        case 'set-feature-role': {
+          const { serviceId, featureId, role } = dataset;
+          const member = state.allMembers.find(m => m.id === state.selectedMemberId);
+          if (member) {
+            const srv = member.services?.find(s => s.id === serviceId);
+            if (srv) {
+              if (!srv.features) srv.features = [];
+              const feat = srv.features.find(f => f.id === featureId);
+              if (feat) {
+                feat.role = role;
+              } else {
+                srv.features.push({ id: featureId, role: role, enabled: true });
+              }
+              render();
+            }
+          }
+          break;
+        }
+        case 'open-delete-member':
+          state.selectedMemberId = parseInt(el.dataset.memberId);
+          state.isDeleteModalOpen = true;
+          state.activeActionMenuId = null;
+          render();
+          break;
+        case 'close-delete-modal':
+        case 'close-delete-modal-bg':
+          state.isDeleteModalOpen = false;
+          render();
+          break;
+        case 'confirm-delete':
+          state.allMembers = state.allMembers.filter(m => m.id !== state.selectedMemberId);
+          state.isDeleteModalOpen = false;
+          alert('계정이 삭제되었습니다.');
+          render();
+          break;
+
+        // Super Admin
+        case 'goto-super-admin':
+          state.superAdminTab = el.dataset.tab || 'tenants';
+          navigate('super-admin');
+          break;
+        case 'sa-tab':
+          state.superAdminTab = el.dataset.tab;
+          render();
+          break;
+        case 'sa-member-filter':
+          state.superAdminMemberFilter = el.dataset.filter;
+          render();
+          break;
+        case 'sa-tab-members-filter':
+          state.superAdminTab = 'members';
+          state.memberFilterWorkspace = el.dataset.filter;
+          render();
+          break;
+        case 'open-create-tenant':
+          state.isCreateTenantModalOpen = true;
+          render();
+          break;
+        case 'close-create-tenant':
+          state.isCreateTenantModalOpen = false;
+          render();
+          break;
+        case 'confirm-create-tenant':
+          alert('새 테넌트가 생성되었습니다.');
+          state.isCreateTenantModalOpen = false;
+          render();
+          break;
+        case 'open-edit-tenant':
+          state.selectedTenantId = el.dataset.tenantId;
+          state.isEditTenantModalOpen = true;
+          render();
+          break;
+        case 'close-edit-tenant':
+          state.isEditTenantModalOpen = false;
+          state.selectedTenantId = null;
+          render();
+          break;
+        case 'open-service-manage':
+          state.selectedTenantForService = el.dataset.tenantId;
+          state.isServiceManageModalOpen = true;
+          render();
+          break;
+        case 'close-service-manage':
+          state.isServiceManageModalOpen = false;
+          render();
+          break;
+        case 'open-add-member-to-tenant':
+          state.selectedTenantForMember = el.dataset.tenantId;
+          state.isAddMemberToTenantModalOpen = true;
+          render();
+          break;
+        case 'close-add-member':
+          state.isAddMemberToTenantModalOpen = false;
+          render();
+          break;
+        case 'open-service-modal':
+          state.isCreateServiceModalOpen = true;
+          render();
+          break;
+        case 'close-service-modal':
+          state.isCreateServiceModalOpen = false;
+          render();
+          break;
+        case 'open-edit-service':
+          state.selectedServiceId = el.dataset.serviceId;
+          state.isEditServiceModalOpen = true;
+          render();
+          break;
+        case 'close-edit-service-modal':
+          state.isEditServiceModalOpen = false;
+          state.selectedServiceId = null;
+          render();
+          break;
+        case 'delete-service': {
+          if (confirm('이 서비스를 정말 삭제하시겠습니까? 삭제 시 모든 워크스페이스에서 해당 기능이 제거됩니다.')) {
+            const svcId = el.dataset.serviceId;
+            state.allServices = state.allServices.filter(s => s.id !== svcId);
+            state.workspaces.forEach(ws => {
+              ws.enabledServiceIds = ws.enabledServiceIds.filter(id => id !== svcId);
+            });
+            alert('서비스가 삭제되었습니다.');
+            render();
+          }
+          break;
+        }
+        case 'toggle-service-for-tenant': {
+          const svcId = el.dataset.serviceId;
+          const tenantId = el.dataset.tenantId;
+          const ws = workspaces.find(w => w.id === tenantId);
+          if (ws) {
+            const idx = ws.enabledServiceIds.indexOf(svcId);
+            if (idx >= 0) ws.enabledServiceIds.splice(idx, 1);
+            else ws.enabledServiceIds.push(svcId);
+          }
+          render();
+          break;
+        }
+
+        // Common modals
+        case 'open-invite':
+          state.isInviteModalOpen = true;
+          render();
+          break;
+        case 'close-invite':
+        case 'close-modal-bg':
+          state.isInviteModalOpen = false;
+          render();
+          break;
+        case 'confirm-invite': {
+          const email = document.getElementById('invite-email')?.value;
+          if (!email) {
+            alert('이메일 주소를 입력해 주세요.');
+            return;
+          }
+          
+          const serviceRoles = [];
+          document.querySelectorAll('.invite-service-role-select').forEach(sel => {
+            const srvId = sel.dataset.serviceId;
+            const role = sel.value;
+            const srv = state.allServices.find(s => s.id === srvId);
+            serviceRoles.push({
+              id: srvId,
+              role: role,
+              features: srv.features ? srv.features.map(f => ({ id: f.id, role: role, enabled: true })) : []
+            });
+          });
+
+          const newMember = {
+            id: Date.now(),
+            name: email.split('@')[0],
+            email: email,
+            role: 'editor', // 기본 워크스페이스 역할
+            status: 'pending',
+            workspaceId: state.currentWorkspace.id,
+            services: serviceRoles
+          };
+
+          state.allMembers.push(newMember);
+          alert('초대 메일이 발송되었습니다.');
+          state.isInviteModalOpen = false;
+          render();
+          break;
+        }
+        case 'resend-invite': {
+          const mid = parseInt(el.dataset.memberId);
+          const member = state.allMembers.find(m => m.id === mid);
+          if (member) {
+            if (confirm(`${member.name}님에게 초대 메일을 다시 발송하시겠습니까?`)) {
+              alert(`${member.email} 주소로 초대 메일이 재발송되었습니다.`);
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    // ──────────────────────────────────────────
+    // Init
+    // ──────────────────────────────────────────
+    render();
+  </script>
+
+
+</body></html>
